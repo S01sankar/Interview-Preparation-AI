@@ -111,7 +111,10 @@ Input Sanitization
 File Type Validation
 File Size Limits
 Secure Environment Variables
-Deployment
-Frontend
 
-Render
+Deployment Link:
+Frontend:
+https://prepai-interview.netlify.app/
+
+Backend:
+https://prepai-backend-c9h0.onrender.com/
