@@ -259,7 +259,6 @@ const FeedbackCard = ({
         padding: "14px 16px",
         marginTop: "14px",
         border: "1px solid var(--border-color)",
-        borderLeft: "3px solid var(--brand-primary)",
       }}>
         <p style={{
           color: "var(--brand-primary)",

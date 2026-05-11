@@ -59,8 +59,7 @@ const DebateArena = () => {
         jobRole,
       });
 
-      const { opponentPosition, openingArgument, crossQuestion } = res.data.debate;
-
+      const { openingArgument, crossQuestion } = res.data.debate;
       setHistory([
         {
           role: "opponent",

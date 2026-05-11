@@ -62,8 +62,9 @@ const Leaderboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    fetchLeaderboard();
-  }, [selectedRole]);
+  fetchLeaderboard();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [selectedRole]);
 
   const fetchLeaderboard = async () => {
     setLoading(true);

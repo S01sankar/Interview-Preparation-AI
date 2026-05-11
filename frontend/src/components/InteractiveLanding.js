@@ -62,7 +62,6 @@ const DraggableCard = ({ children, initialX, initialY, zIndex = 1 }) => {
 const InteractiveLeaf = ({ x, y, size, color, delay, shape }) => {
   const [pos, setPos] = useState({ x, y });
   const [target, setTarget] = useState({ x, y });
-  const animRef = useRef(null);
 
   useEffect(() => {
     const onMouseMove = (e) => {
