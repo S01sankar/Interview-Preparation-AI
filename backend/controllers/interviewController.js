@@ -6,52 +6,76 @@ const Session = require("../models/Session");
 
 // @desc    Upload resume and extract text
 // @route   POST /api/interview/upload-resume
+
 const uploadResume = async (req, res) => {
   try {
+    console.log("UPLOAD API CALLED");
+
+    console.log("REQ FILE:", req.file);
+
     if (!req.file) {
-      return res.status(400).json({ message: "No PDF file uploaded" });
+      return res.status(400).json({
+        message: "No PDF uploaded",
+      });
     }
 
     const filePath = req.file.path;
 
-    // Extract text from PDF using pdfreader
     const extractText = () => {
       return new Promise((resolve, reject) => {
         let text = "";
+
         new PdfReader().parseFileItems(filePath, (err, item) => {
+
           if (err) {
+            console.log("PDF ERROR:", err);
             reject(err);
-          } else if (!item) {
-            // End of file
-            resolve(text.trim());
-          } else if (item.text) {
+          }
+
+          else if (!item) {
+            resolve(text);
+          }
+
+          else if (item.text) {
             text += item.text + " ";
           }
+
         });
       });
     };
 
     const resumeText = await extractText();
 
-    // Delete temp file immediately
-    fs.unlinkSync(filePath);
-
-    if (!resumeText || resumeText.length < 50) {
-      return res.status(400).json({ message: "Could not extract text from PDF" });
+    // delete uploaded file
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
     }
 
-    res.status(200).json({
-      message: "Resume parsed successfully",
+    if (!resumeText || resumeText.length < 20) {
+      return res.status(400).json({
+        message: "Could not extract resume text",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
       resumeText,
     });
+
   } catch (error) {
-    if (req.file && fs.existsSync(req.file.path)) {
+
+    console.log("UPLOAD ERROR:", error);
+
+    if (req.file?.path && fs.existsSync(req.file.path)) {
       fs.unlinkSync(req.file.path);
     }
-    console.error("Resume upload error:", error.message);
-    res.status(500).json({ message: "Failed to process resume" });
+
+    return res.status(500).json({
+      message: error.message || "Resume upload failed",
+    });
   }
 };
+
 // @desc    Generate questions via GPT-3.5 turbo
 // @route   POST /api/interview/generate-questions
 const generateQuestions = async (req, res) => {

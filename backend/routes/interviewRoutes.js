@@ -2,7 +2,10 @@ const express = require("express");
 const router = express.Router();
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
+
 const { protect } = require("../middleware/authMiddleware");
+
 const {
   uploadResume,
   generateQuestions,
@@ -11,11 +14,19 @@ const {
   completeSession,
 } = require("../controllers/interviewController");
 
-// Multer config for PDF resume
+// Create uploads folder automatically
+const uploadDir = path.join(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadDir)) {
+  fs.mkdirSync(uploadDir, { recursive: true });
+}
+
+// Resume Storage
 const resumeStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/"));
+    cb(null, uploadDir);
   },
+
   filename: (req, file, cb) => {
     cb(null, `resume-${Date.now()}-${file.originalname}`);
   },
@@ -23,21 +34,26 @@ const resumeStorage = multer.diskStorage({
 
 const resumeUpload = multer({
   storage: resumeStorage,
-  limits: { fileSize: 5 * 1024 * 1024 },
+
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+  },
+
   fileFilter: (req, file, cb) => {
     if (file.mimetype === "application/pdf") {
       cb(null, true);
     } else {
-      cb(new Error("Only PDF files are allowed"), false);
+      cb(new Error("Only PDF files allowed"));
     }
   },
 });
 
-// Multer config for audio
+// Audio Storage
 const audioStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, path.join(__dirname, "../uploads/"));
+    cb(null, uploadDir);
   },
+
   filename: (req, file, cb) => {
     cb(null, `audio-${Date.now()}.webm`);
   },
@@ -45,14 +61,27 @@ const audioStorage = multer.diskStorage({
 
 const audioUpload = multer({
   storage: audioStorage,
-  limits: { fileSize: 25 * 1024 * 1024 },
 });
 
 // Routes
-router.post("/upload-resume",      protect, resumeUpload.single("resume"), uploadResume);
+router.post(
+  "/upload-resume",
+  protect,
+  resumeUpload.single("resume"),
+  uploadResume
+);
+
 router.post("/generate-questions", protect, generateQuestions);
-router.post("/transcribe",         protect, audioUpload.single("audio"), transcribeAudio);
-router.post("/score-answer",       protect, scoreAnswer);
-router.post("/complete-session",   protect, completeSession);
+
+router.post(
+  "/transcribe",
+  protect,
+  audioUpload.single("audio"),
+  transcribeAudio
+);
+
+router.post("/score-answer", protect, scoreAnswer);
+
+router.post("/complete-session", protect, completeSession);
 
 module.exports = router;
